@@ -23,6 +23,7 @@ import time
 import datetime as dt
 import os
 import csv
+import string
 
 
 
@@ -86,11 +87,36 @@ def coil(position,turns,radius,height,steps):
     
     pairedArray = []
     for i in range(len(t)):
-        pairedArray.append([x[i],y[i],z])
+        pairedArray.append([x[i],y[i],z[i]])
     pairedArray = np.array(pairedArray)
 
     
     return xyzArray,pairedArray
+
+#torus coil
+
+def torus(position, turns ,ir,outr, steps):
+    x0,y0,z0 = position
+    t = np.linspace(0,steps,steps+1)
+    R = ir
+    r = outr - ir
+    phi = 2*pi*t/steps
+    theta = turns*phi
+    
+    x = x0+(R+r*np.cos(theta))*np.cos(phi)
+    y = y0+(R+r*np.cos(theta))*np.sin(phi)
+    z = z0+r*np.sin(theta)
+    
+    xyzArray = np.array([x,y,z])
+    
+    
+    pairedArray = np.empty((len(x),3))
+
+    for i in range(len(t)):
+        pairedArray[i] =  [x[i],y[i],z[i]]
+    
+    return xyzArray, pairedArray
+
 
 #For part 5
 #creates the normalised vectors
@@ -117,12 +143,20 @@ def magnitude(vector):
 
 #--------------
 
-def mutualInductance(positionSecondary ,nt1 ,nt2 ,ir1 ,ir2 ,or1 ,or2 ,steps1 ,steps2 ,deltaK, deltaL):
-    tstart = time.time()
+def mutualInductance(primaryType, secondaryType, positionSecondary ,ntP ,ntS ,Variable1P ,Variable1S ,Variable2P ,Variable2S ,steps1 ,steps2 ,deltaK, deltaL):
     positionPrimary = [0,0,0]
-    l = archimedeanSpiral(positionPrimary,nt1,ir1,or1,steps2)
-    k = archimedeanSpiral(positionSecondary,nt2,ir2,or2,steps1)
-    
+    if primaryType == 'S':
+        l = archimedeanSpiral(positionPrimary,ntP,Variable1P,Variable2P,steps1)
+    elif primaryType == 'C':
+        l = coil(positionPrimary,ntP,Variable1P,Variable2P,steps1)
+    elif primaryType == 'T':
+        l = torus(positionPrimary,ntP,Variable1P,Variable2P,steps1)
+    if secondaryType == 'S':     
+        k = archimedeanSpiral(positionSecondary,ntS,Variable1S,Variable2S,steps2)
+    elif secondaryType == 'C':
+        k = coil(positionSecondary,ntS,Variable1S,Variable2S,steps2)
+    elif secondaryType == 'T':
+        k = torus(positionSecondary,ntS,Variable1S,Variable2S,steps2)
     
     
     #--------------------
@@ -159,13 +193,9 @@ def mutualInductance(positionSecondary ,nt1 ,nt2 ,ir1 ,ir2 ,or1 ,or2 ,steps1 ,st
     constant = mu*deltaK*deltaL/(4*pi)
     M = 0
     for alpha in range(1,al):
-        os.system('clear')
+        
         print(alpha*100/al)
-        tEnd = time.time()
-        deltaT = tEnd-tstart
-        tRemaining = deltaT*(1-alpha/al)/(1/al)
-        tstart = tEnd
-        print(dt.timedelta(seconds = tRemaining))
+         
         for beta in range(1,ak):
             
             X = int(cl[alpha-1]/deltaL)
@@ -185,44 +215,105 @@ def mutualInductance(positionSecondary ,nt1 ,nt2 ,ir1 ,ir2 ,or1 ,or2 ,steps1 ,st
                     diff = Kchi - Ke
                     den = np.sqrt(np.dot(diff,diff))
                     
+                    
                     #Sum up all the individual pieces
                     M += constant*num/den
                     
                     
                     
-    
+    '''
     fig = plt.figure()
     ax = plt.subplot(111,projection='3d')
     ax.plot(l[0][0],l[0][1],l[0][2])
     ax.plot(k[0][0],k[0][1],k[0][2])
-                
+    ''' 
+         
     return M
     
 
 
+
     
-#Do the loop thing
+#Initial conditions
+
+typePrimary = 'S'
+typeSecondary = 'S' 
+nt1 = 26
+nt2 = 26
+par1P = 5                   #mm
+par1S = 5                   #mm  Inner radius for sprial and torus, radius for coil
+par2P = 20                   #mm
+par2S = 20                 #mm  Outer radius for spiral and torus, height for coil
+steps1 = 100
+steps2 = 100
+deltaK = deltaL = .5
+positionY = np.arange(-25,30,step = 5)  #mm
+positionX = 0
+positionZ = 100
+
+# ---------------------
+#To create a unique name for the file which contains all the info 
+numbers = list(np.arange(0,65,1))
+B64 = list(string.ascii_uppercase)+list(string.ascii_lowercase)+['0','1','2','3','4','5','6','7','8','9']+['+',"-"]
+
+'''
+def encode(message):
+    aIndex = numbers.index(np.floor(message/64))
+    bIndex = numbers.index(message%64)
+    encode = B64[aIndex]+B64[bIndex]
+    return encode
+
+def decode(message):
+    aIndex = B64.index(message[0])
+    bIndex = B64.index(message[1])
+    decode = numbers[aIndex]+numbers[bIndex]
+    return decode
+
+def numberOrletter(var,pos):
+    if type(var) == int:
+        return var
+    else:
+        return pos
+
+turnP = encode(nt1)
+turnS = encode(nt2)
+var1P = encode(par1P)
+var1S = encode(par1S)
+var2P = encode(par2P)
+var2S = encode(par2S)
+middle = '-%s-%s-%s-'%(numberOrletter(positionX,'x'),numberOrletter(positionY,'y'),numberOrletter(positionZ,'z'))
+name = typePrimary+typeSecondary+turnP+var1P+var2P+middle+turnS+var1S+var2S
+
+print(name)
+#---------------------
+
+'''
+
+name = 'TC'
+with open('/home/dillen/University/Python/Summer Project/Coil/%s.csv'%name,mode='w') as file:
+    writer = csv.writer(file)
+    writer.writerow([nt1, nt2, par1P, par1S, par2P, par2S, steps1, steps2, deltaK, deltaL])
     
-nt1 = nt2 = 20
-ir1 = ir2 = 20 #mm
-or1 = or2 = 40 #mm
-steps1 = steps2 = 1000
-deltaK = deltaL = 0.5
-positionY = np.arange(-50,50,step = 5)  #mm
-
-print(positionY)
-'''
-positionSecondary = [0,5,10]
-mutualInductance(positionSecondary, nt1, nt2, ir1, ir2, or1, or2, steps1, steps2, deltaK, deltaL)
-'''
 
 
-mis = []
+#execute the loop
+
+
+tstart = time.time()
+
 for var in positionY:
-    positionSecondary = [0,var,10]
-    Mi = mutualInductance(positionSecondary, nt1, nt2, ir1, ir2, or1, or2, steps1, steps2, deltaK, deltaL)   
-    mis.append(Mi)
-    with open('data.csv','a+',) as file:
+    positionSecondary = [positionX,var,positionZ]
+    Mi = mutualInductance(typePrimary, typeSecondary, positionSecondary, nt1, nt2, par1P, par1S, par2P, par2S, steps1, steps2, deltaK, deltaL)   
+    os.system('clear')
+    varPosition = list(positionY).index(var)+1
+    print(np.floor(varPosition*100/len(positionY)))
+    tEnd = time.time()
+    deltaT = tEnd-tstart
+    tRemaining = deltaT*(1-varPosition/len(positionY))/(1/len(positionY))
+    tstart = tEnd
+    print(dt.timedelta(seconds = tRemaining))
+       
+    with open('/home/dillen/University/Python/Summer Project/Coil/%s.csv'%(name),'a') as file:
         writer = csv.writer(file)
         writer.writerow([var,Mi])
 
