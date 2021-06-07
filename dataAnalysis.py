@@ -37,7 +37,7 @@ expT, expE = extract('Data/exp1.csv',3)     #expT is time (s), expE is induced E
 #Initial conditions
 Vs = 2              # (V) Source, driving potential difference
 Rs = 0.5            # (Ω) Source resistance
-f = 10814.917055/(2*np.pi)          # (Hz) Source, driving frequency
+f = 1000          # (Hz) Source, driving frequency
 velocity = 0.05     # (m/s) lift velocity
 
 
@@ -62,21 +62,21 @@ maxEIndex = np.where(expE == maxE)  #and find the index position
 expD -= expD[maxEIndex]             #and now subtract by that distance
 
 
-expM = expE/(Is*ω*np.cos(ω*expD/(velocity*1e3)))                     #Mutual inductance equation for t = n*ω/2π
+expM = expE/(Is*ω)                     #Mutual inductance equation for t = n*ω/2π
                                     #not comletely correct as there should be a
                                     #sin(ωt) component in the denominator but it
                                     #kinda fucks up with the discretisation of the
                                     #picoscope
 
 #clean the broken data points
-deletePoints = []
-for i in range(len(expM)):
-    if np.abs(expM[i]) > np.amax(compM)*20:
-        deletePoints.append(i)
-
-expM = np.delete(expM,deletePoints)
-expD = np.delete(expD,deletePoints)
-
+# deletePoints = []
+# for i in range(len(expM)):
+#     if np.abs(expM[i]) > np.amax(compM)*20:
+#         deletePoints.append(i)
+#
+# expM = np.delete(expM,deletePoints)
+# expD = np.delete(expD,deletePoints)
+#
 
 #----plot the data----
 
