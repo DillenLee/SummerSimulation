@@ -29,6 +29,22 @@ compD,compM = extract('Data/R1.csv', 2)     #compD is distance (mm), compM is mu
 #extract the experimental data
 expT, expE = extract('Data/exp1.csv',3)     #expT is time (s), expE is induced EMF ε (mV)
 
+
+#--------------------------------------------
+# Deprecated, trying to manually find out the frequency, result was 50 Hz, far below what is expected.
+# plt.plot(expT[1260:1268],expE[1260:1268])
+# t0 = expT[1260]
+# e0 = expE[1260]
+# grad = (expE[1268]-expE[1267])/(expT[1268]-expT[1267])
+# c = grad*expT[1267]-expE[1267]
+# def x(y):
+#     return (y+c)/grad
+# T = (x(e0)-t0)
+# f = 1/T
+# print(f)
+
+#--------------------------------------------
+
 #This part will compare the mutual inductance between the experimental
 #and the computational simulation
 
@@ -37,7 +53,7 @@ expT, expE = extract('Data/exp1.csv',3)     #expT is time (s), expE is induced E
 #Initial conditions
 Vs = 2              # (V) Source, driving potential difference
 Rs = 0.5            # (Ω) Source resistance
-f = 1000          # (Hz) Source, driving frequency
+f = 1e3          # (Hz) Source, driving frequency
 velocity = 0.05     # (m/s) lift velocity
 
 
