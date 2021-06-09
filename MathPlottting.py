@@ -3,49 +3,47 @@
 """
 Created on Wed May 26 15:14:38 2021
 
-@author: 
-   ___  _ ____             __          
-  / _ \(_) / /__ ___      / /  ___ ___ 
+@author:
+   ___  _ ____             __
+  / _ \(_) / /__ ___      / /  ___ ___
  / // / / / / -_) _ \    / /__/ -_) -_)
-/____/_/_/_/\__/_//_/   /____/\__/\__/ 
+/____/_/_/_/\__/_//_/   /____/\__/\__/
 
 """
 #import the packages
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-
+from numpy import pi
 
 #--------------
 #Set the universal time
-time = np.linspace(0, 2e-4,10000)
+time = np.linspace(-10e-6, 10e-6,10000)
 
-#set some easy variables
-pi = np.pi
 
 #-----------
 #define the conditions
 
 #define the values of the components in base units
-Rs = 50        #Load resistence
-R1 = 0.5        #Variable resistance circuit 2
-R2 = 4.7e3        #Variable resistance circuit 1
-R0 = 50         #Internal car resistance   
+Rs = 600         #Load resistence
+R1 = 0.5        #Variable resistance circuit 1
+R2 = 0.5      #Variable resistance circuit 2
+R0 = 200e3         #Internal car resistance
 L1 = 26e-6      #Inductance of circuit 1
 L2 = 26e-6      #Inductance of circuit 2
-C1 = 1e-6       #Capacitance of circuit 1
+C1 = 1e-9       #Capacitance of circuit 1
 C2 = 1e-9       #Capacitance of circuit 2
 
-k = 0.3         #Coupling constant
+k = 0.196         #Coupling constant
 
 
 #set the driving frequency
-ω = 1/np.sqrt(L1*C1)
-
+# ω = 1/np.sqrt(L1*C1)
+ω = 2*pi*600e3
 
 #set the voltage source, sinusoidal wave
 
-imaginaryVs = 9*np.exp(time*1j*ω)
+imaginaryVs = -1*2*np.exp(time*1j*ω)
 realVs = np.real(imaginaryVs)
 
 #define impdences from the components
@@ -60,7 +58,7 @@ C1imp = -1j/(ω*C1)
 C2imp = -1j/(ω*C2)
 
 
-    
+
 
 #Variables calculated from the initial conditions
 M = k*np.sqrt(L1*L2)                      #Mutual inductance
@@ -75,7 +73,7 @@ I2 = (1j*ω*M*imaginaryVs)/(Z1*Z2+((ω*M)**2))  #Current in circuit 2
 
 
 powerIn  =  imaginaryVs*I1
-powerOut = R0*I2**2
+powerOut = (R0+R2)*I2**2
 
 Vout = powerOut/I2
 
@@ -89,7 +87,12 @@ Vout = powerOut/I2
 print("the efficiancy is %.3f"%(np.max(np.real(η))))
 print(np.max((np.real(Vout))))
 
-     
+#--------------Experimental stuff-----------
+expT, expE = np.loadtxt('Data/bigstat.csv', unpack = True, skiprows = 3, delimiter=',')
+expT *= 1e-6          #convert from μs to s
+expE *= 1e-3          #convert from mV to V
+
+
 
 
 #figure plotting
@@ -97,15 +100,16 @@ fig = plt.figure()
 ax1 = plt.subplot(111)
 #ax2 = plt.subplot(212)
 ax1.grid()
-plt.xlim(0,10e-6)
+#plt.xlim(0,10e-6)
 #ax2.grid()
 ax1.plot(time,realVs)
 ax1.plot(time,np.real(Vout))
+ax1.plot(expT,expE)
 plt.title("ω = %s"%(np.format_float_scientific(ω,precision=3)))
-plt.legend(['Vin',"Vout"])
+plt.legend(['Computational Vin',"Computational Vout","Experimental Vout"])
 plt.show()
 
-plt.xlim(0,1e-5)
+# plt.xlim(0,1e-5)
 plt.plot(time,I1)
 plt.plot(time,I2)
 plt.legend(['I1',"I2"])

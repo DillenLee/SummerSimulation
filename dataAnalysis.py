@@ -52,9 +52,9 @@ expT, expE = extract('Data/exp1.csv',3)     #expT is time (s), expE is induced E
 
 #Initial conditions
 Vs = 2              # (V) Source, driving potential difference
-Rs = 0.5            # (Ω) Source resistance
-f = 1e3          # (Hz) Source, driving frequency
-velocity = 0.05     # (m/s) lift velocity
+Rs = 0.6            # (Ω) Source resistance
+f = 600e3         # (Hz) Source, driving frequency
+velocity = 0.064     # (m/s) lift velocity
 
 
 
@@ -111,7 +111,7 @@ ax.set_xlabel('Distance from equilibrium (mm)')
 ax.set_ylabel('Mutual inductance (mH)')
 ax.plot(expD,expM)
 ax.plot(compD,compM)
-ax.legend(['Experimental data','Simulation model'],loc ='lower right')
+ax.legend(['Experimental data','Simulation model'],loc ='upper right')
 fig.savefig('MutualInductance.png',dpi=600,bbox_inches='tight')
 
 
