@@ -25,10 +25,10 @@ time = np.linspace(-10e-6, 10e-6,10000)
 #define the conditions
 
 #define the values of the components in base units
-Rs = 600         #Load resistence
+Rs = 600        #Internal resistance of picoscope
 R1 = 0.5        #Variable resistance circuit 1
-R2 = 0.5      #Variable resistance circuit 2
-R0 = 200e3         #Internal car resistance
+R2 = 0.5        #Variable resistance circuit 2
+R0 = 0          #Internal car resistance
 L1 = 26e-6      #Inductance of circuit 1
 L2 = 26e-6      #Inductance of circuit 2
 C1 = 1e-9       #Capacitance of circuit 1
@@ -67,13 +67,13 @@ Z2 = R0imp+R2imp+L2imp+C2imp              #Total inductance of circuit 2
 
 
 
-I1 = imaginaryVs/(Z1+((ω*M)**2)/Z2)         #Current in circuit 1
+I1 = imaginaryVs/(Z1+((ω*M)**2)/Z2)           #Current in circuit 1
 I2 = (1j*ω*M*imaginaryVs)/(Z1*Z2+((ω*M)**2))  #Current in circuit 2
 
 
 
 powerIn  =  imaginaryVs*I1
-powerOut = (R0+R2)*I2**2
+powerOut = (np.real(L2)+R2)*I2**2
 
 Vout = powerOut/I2
 
@@ -105,6 +105,8 @@ ax1.grid()
 ax1.plot(time,realVs)
 ax1.plot(time,np.real(Vout))
 ax1.plot(expT,expE)
+ax1.set_xlabel('Time (s)')
+ax1.set_ylabel('Potential difference (V)')
 plt.title("ω = %s"%(np.format_float_scientific(ω,precision=3)))
 plt.legend(['Computational Vin',"Computational Vout","Experimental Vout"])
 plt.show()
@@ -113,4 +115,5 @@ plt.show()
 plt.plot(time,I1)
 plt.plot(time,I2)
 plt.legend(['I1',"I2"])
+plt.show()
 #ax2.plot(time,I2,color="red")

@@ -52,7 +52,7 @@ expT, expE = extract('Data/exp1.csv',3)     #expT is time (s), expE is induced E
 
 #Initial conditions
 Vs = 2              # (V) Source, driving potential difference
-Rs = 0.6            # (Ω) Source resistance
+Rs = 600            # (Ω) Source resistance
 f = 600e3         # (Hz) Source, driving frequency
 velocity = 0.064     # (m/s) lift velocity
 
@@ -146,4 +146,30 @@ ax2.plot(compD,compK,color='red')
 ax2.legend(['Experimental data','Simulation model'],loc ='upper right')
 fig2.savefig('CouplingCoefficient.png',dpi=600,bbox_inches='tight')
 plt.tight_layout()
+
+#---------------------------------------------
+# Polyfit the data to an Nth degree polynomial
+coeff,cov = np.polyfit(compD,compM,30,cov=True)
+
+# Find the x and y using the polyfit data, delete this later
+compX = np.linspace(-225,225,1000000)         #same bounds as our data
+compY = np.polyval(coeff,compX)             #Mutual inductance approximated
+
+compE = np.real(compY*Is*ω*np.exp(1j*ω*compX))
+
+
+
+
+# More boring matplotlib stuff
+fig3 = plt.figure()
+plt.grid()
+ax3 = plt.subplot(111)
+ax3.set_xlabel('Distance from equilibrium (mm)')
+ax3.set_ylabel('Induced ε (mV)')
+ax3.plot(expD,expE)
+ax3.plot(compX,compE)
+ax3.set_xlim([-200,200])
+ax3.legend(['Experimental','Computational'])
+ax3.set_title('Comparing induced EMF')
+fig3.savefig('comparingEMF.png',dpi=600)
 plt.show()
