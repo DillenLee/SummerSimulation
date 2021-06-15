@@ -24,10 +24,10 @@ def extract(ID,rowsToSkip):
 #Compare the large coil radius 38.5mm
 
 #extract the computational data points
-compD,compM = extract('Data/R1.csv', 2)     #compD is distance (mm), compM is mutual inductance (mH)
+compD,compM = extract('Data/R2.csv', 2)     #compD is distance (mm), compM is mutual inductance (mH)
 
 #extract the experimental data
-expT, expE = extract('Data/exp1.csv',3)     #expT is time (s), expE is induced EMF ε (mV)
+expT, expE = extract('Data/exp2.csv',3)     #expT is time (s), expE is induced EMF ε (mV)
 
 
 #--------------------------------------------
@@ -53,6 +53,9 @@ expT, expE = extract('Data/exp1.csv',3)     #expT is time (s), expE is induced E
 #Initial conditions
 Vs = 2              # (V) Source, driving potential difference
 Rs = 600            # (Ω) Source resistance
+Rr = 0.5            # (Ω) Receiver resistance
+c = 1e-9            # (F) Capacitance
+l = 26e-6           # (H) Inductance
 f = 600e3         # (Hz) Source, driving frequency
 velocity = 0.064     # (m/s) lift velocity
 
@@ -60,10 +63,8 @@ velocity = 0.064     # (m/s) lift velocity
 
 
 #----calculations-----
-Is = Vs/Rs          # (A) Driving current
 ω = 2*np.pi*f       # (rad/s) Source driving angular frequency
-
-
+Is = Vs/np.sqrt(Rs**2+(ω*l-1/(ω*c))**2)          # (A) Driving current
 
 
 #---------------------------
@@ -77,22 +78,13 @@ maxE = np.amax(expE)                #take the largest EMF
 maxEIndex = np.where(expE == maxE)  #and find the index position
 expD -= expD[maxEIndex]             #and now subtract by that distance
 
+Ir = expE/np.sqrt(Rr**2+(ω*l-1/(ω*c))**2)
 
-expM = expE/(Is*ω)                     #Mutual inductance equation for t = n*ω/2π
+expM = (expE+l*Ir*ω)/(Is*ω)                  #Mutual inductance equation for t = n*ω/2π
                                     #not comletely correct as there should be a
                                     #sin(ωt) component in the denominator but it
                                     #kinda fucks up with the discretisation of the
                                     #picoscope
-
-#clean the broken data points
-# deletePoints = []
-# for i in range(len(expM)):
-#     if np.abs(expM[i]) > np.amax(compM)*20:
-#         deletePoints.append(i)
-#
-# expM = np.delete(expM,deletePoints)
-# expD = np.delete(expD,deletePoints)
-#
 
 #----plot the data----
 

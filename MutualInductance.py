@@ -3,11 +3,11 @@
 """
 Created on Fri May 28 11:01:36 2021
 
-@author: 
-   ___  _ ____             __          
-  / _ \(_) / /__ ___      / /  ___ ___ 
+@author:
+   ___  _ ____             __
+  / _ \(_) / /__ ___      / /  ___ ___
  / // / / / / -_) _ \    / /__/ -_) -_)
-/____/_/_/_/\__/_//_/   /____/\__/\__/ 
+/____/_/_/_/\__/_//_/   /____/\__/\__/
 
 
 Notes:
@@ -19,7 +19,7 @@ Notes:
 
 import numpy as np
 import matplotlib.pyplot as plt
-import time 
+import time
 import datetime as dt
 import os
 import csv
@@ -34,7 +34,7 @@ t0 = time.time()
 pi = np.pi
 
 #Initial conditions
-mu = 4*pi*1e-7              
+mu = 4*pi*1e-7
 
 
 #--------------
@@ -49,25 +49,25 @@ def archimedeanSpiral(position,turns,innerRadius,outerRadius,steps):
     t = np.linspace(lowerT,upperT,steps)
     a = innerRadius
     b = (outerRadius-innerRadius)/(upperT)
-    
-    
-    #The general form of the archimedian spiral in cylindrical coordinates is 
+
+
+    #The general form of the archimedian spiral in cylindrical coordinates is
     #r = a + bθ, in this case it will be paremerised into its x and y coordinates
     #following x = r*cosθ and y = r*sinθ. The inner radius is detirmined by a
     #and the outer radius depends on the amount of turns according to the eqn
     #b = ΔD/(2π*t)
-    
+
     x = x0+(np.cos(t)*(a+b*t))
     y = y0+(np.sin(t)*(a+b*t))
     z = z0
     xyzArray = np.array([x,y,z])
-    
+
     pairedArray = []
     for i in range(len(t)):
         pairedArray.append([x[i],y[i],z])
     pairedArray = np.array(pairedArray)
-    
-    
+
+
     return xyzArray,pairedArray
 
 #Multilayered coil
@@ -77,20 +77,20 @@ def coil(position,turns,radius,height,steps):
     upperT = 2*pi*turns
     t = np.linspace(lowerT,upperT,steps)
     r = radius
-    
+
     #This is a simple coil converted from cylindrical coordinates to cartesian.
-    
+
     x = x0+(r*np.cos(t))
     y = y0+(r*np.sin(t))
     z = z0+(height*(t/upperT))
     xyzArray = np.array([x,y,z])
-    
+
     pairedArray = []
     for i in range(len(t)):
         pairedArray.append([x[i],y[i],z[i]])
     pairedArray = np.array(pairedArray)
 
-    
+
     return xyzArray,pairedArray
 
 #torus coil
@@ -102,19 +102,19 @@ def torus(position, turns ,ir,outr, steps):
     r = outr - ir
     phi = 2*pi*t/steps
     theta = turns*phi
-    
+
     x = x0+(R+r*np.cos(theta))*np.cos(phi)
     y = y0+(R+r*np.cos(theta))*np.sin(phi)
     z = z0+r*np.sin(theta)
-    
+
     xyzArray = np.array([x,y,z])
-    
-    
+
+
     pairedArray = np.empty((len(x),3))
 
     for i in range(len(t)):
         pairedArray[i] =  [x[i],y[i],z[i]]
-    
+
     return xyzArray, pairedArray
 
 
@@ -151,93 +151,94 @@ def mutualInductance(primaryType, secondaryType, positionSecondary ,ntP ,ntS ,Va
         l = coil(positionPrimary,ntP,Variable1P,Variable2P,steps1)
     elif primaryType == 'T':
         l = torus(positionPrimary,ntP,Variable1P,Variable2P,steps1)
-    if secondaryType == 'S':     
+    if secondaryType == 'S':
         k = archimedeanSpiral(positionSecondary,ntS,Variable1S,Variable2S,steps2)
     elif secondaryType == 'C':
         k = coil(positionSecondary,ntS,Variable1S,Variable2S,steps2)
     elif secondaryType == 'T':
         k = torus(positionSecondary,ntS,Variable1S,Variable2S,steps2)
-    
-    
+
+
     #--------------------
     #Part 1
     #Define the amount of line segments
     al = len(l[0][0])
     ak = len(k[0][0])
-    
+
     #--------------------
     #Part 2
     #Define the amount of vertices
     #bl = al+1
     #bk = ak+1
     #NOT USED
-    
+
     #--------------------
     #Part 3
     #The vector position of all the individual filaments
     ql = l[1]
     qk = k[1]
-    
+
     #--------------------
     #Part 4
     #The length of each individual filament is found
     cl = magnitude(ql)
-    ck = magnitude(qk)  
-    
+    ck = magnitude(qk)
+
     nl = normalise(ql, al, cl)
     nk = normalise(qk, ak, ck)
-    
+
     #Part 6
-    
-    
+
+
     constant = mu*deltaK*deltaL/(4*pi)
     M = 0
     for alpha in range(1,al):
-        
+
         print(alpha*100/al)
-         
+
         for beta in range(1,ak):
-            
+
             X = int(cl[alpha-1]/deltaL)
             E = int(ck[beta-1]/deltaK)
-            
+
             for chi in range(0,X):
                 for e in range(0,E):
                     #define some more variables
                     Kchi = ql[alpha-1] + chi*deltaL*nl[alpha-1]
                     Ke = qk[beta-1] + e*deltaK*nk[beta-1]
-                    
-                    
+
+
                     #do the actual calculation
                     #numerator, take the dot produc of the two
                     num = np.dot(nl[alpha-1],nk[beta-1])
                     #denominator, take the maginitude of the difference
                     diff = Kchi - Ke
                     den = np.sqrt(np.dot(diff,diff))
-                    
-                    
+
+
                     #Sum up all the individual pieces
                     M += constant*num/den
-                    
-                    
-                    
+
+
+
     '''
     fig = plt.figure()
     ax = plt.subplot(111,projection='3d')
     ax.plot(l[0][0],l[0][1],l[0][2])
     ax.plot(k[0][0],k[0][1],k[0][2])
-    ''' 
-         
+    '''
+
     return M
-    
 
 
 
-    
+
+    import csv
+
 #Initial conditions
 
 typePrimary = 'S'
-typeSecondary = 'S' 
+typeSecondary = 'S'
 nt1 = 26
 nt2 = 26
 par1P = 5                   #mm
@@ -252,7 +253,7 @@ positionX = 0
 positionZ = 100
 
 # ---------------------
-#To create a unique name for the file which contains all the info 
+#To create a unique name for the file which contains all the info
 numbers = list(np.arange(0,65,1))
 B64 = list(string.ascii_uppercase)+list(string.ascii_lowercase)+['0','1','2','3','4','5','6','7','8','9']+['+',"-"]
 
@@ -293,7 +294,7 @@ name = 'TC'
 with open('/home/dillen/University/Python/Summer Project/Coil/%s.csv'%name,mode='w') as file:
     writer = csv.writer(file)
     writer.writerow([nt1, nt2, par1P, par1S, par2P, par2S, steps1, steps2, deltaK, deltaL])
-    
+
 
 
 #execute the loop
@@ -303,7 +304,7 @@ tstart = time.time()
 
 for var in positionY:
     positionSecondary = [positionX,var,positionZ]
-    Mi = mutualInductance(typePrimary, typeSecondary, positionSecondary, nt1, nt2, par1P, par1S, par2P, par2S, steps1, steps2, deltaK, deltaL)   
+    Mi = mutualInductance(typePrimary, typeSecondary, positionSecondary, nt1, nt2, par1P, par1S, par2P, par2S, steps1, steps2, deltaK, deltaL)
     os.system('clear')
     varPosition = list(positionY).index(var)+1
     print(np.floor(varPosition*100/len(positionY)))
@@ -312,7 +313,7 @@ for var in positionY:
     tRemaining = deltaT*(1-varPosition/len(positionY))/(1/len(positionY))
     tstart = tEnd
     print(dt.timedelta(seconds = tRemaining))
-       
+
     with open('/home/dillen/University/Python/Summer Project/Coil/%s.csv'%(name),'a') as file:
         writer = csv.writer(file)
         writer.writerow([var,Mi])
