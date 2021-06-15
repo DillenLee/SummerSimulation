@@ -67,7 +67,7 @@ Z2 = R0imp+R2imp+L2imp+C2imp              #Total inductance of circuit 2
 
 
 
-I1 = imaginaryVs/(Z1+((ω*M)**2)/Z2)           #Current in circuit 1
+I1 = imaginaryVs/(Z1+((ω*M)**2)/Z2)          #Current in circuit 1
 I2 = (1j*ω*M*imaginaryVs)/(Z1*Z2+((ω*M)**2))  #Current in circuit 2
 
 

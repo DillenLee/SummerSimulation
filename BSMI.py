@@ -27,8 +27,8 @@ mu = 4*pi*1e-7
 # Initial conditions
 I = 1/300           # (A) current through the transmitting coil
 radiusTrans = 47.5  # (mm) radius of transmitting coil
-radiusRec   = 38.5  # (mm) radius of receiving coil
-Nr = 12.5           # amount of turns in receiving coil
+radiusRec   = 23.5  # (mm) radius of receiving coil
+Nr = 18           # amount of turns in receiving coil
 Nt = 10.5           # amount of turns in transmitting coil
 zPos =  23          # (mm) Z distance between coils
 tHeight = 4.75       # (mm) The height of the transmitting coil
@@ -127,10 +127,10 @@ def BiotSavart(object,position):
 
 
 # Create a file for the Data
-name = 'BSlargeR'
+name = 'BSsmallR'
 with open('/home/dillen/University/Python/SummerSimulation/Data/%s.csv'%name,mode='w') as file:
     writer = csv.writer(file)
-    writer.writerow(['Distance (mm)','Mutual Inductance (mH)','Large coil'])
+    writer.writerow(['Distance (mm)','Mutual Inductance (mH)','Small coil'])
 
 
 
