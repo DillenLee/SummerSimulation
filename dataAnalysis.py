@@ -24,7 +24,7 @@ def extract(ID,rowsToSkip):
 #Compare the large coil radius 38.5mm
 
 #extract the computational data points
-compD,compM = extract('Data/R2.csv', 2)     #compD is distance (mm), compM is mutual inductance (mH)
+compD,compM = extract('Data/BS2.csv', 2)     #compD is distance (mm), compM is mutual inductance (mH)
 
 #extract the experimental data
 expT, expE = extract('Data/exp2.csv',3)     #expT is time (s), expE is induced EMF ε (mV)
@@ -56,8 +56,8 @@ Rs = 600            # (Ω) Source resistance
 Rr = 0.5            # (Ω) Receiver resistance
 c = 1e-9            # (F) Capacitance
 l = 26e-6           # (H) Inductance
-f = 600e3         # (Hz) Source, driving frequency
-velocity = 0.064     # (m/s) lift velocity
+f = 600e3           # (Hz) Source, driving frequency
+velocity = 0.064    # (m/s) lift velocity
 
 
 
